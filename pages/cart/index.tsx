@@ -3,8 +3,20 @@ import { Box } from '@mui/system';
 import { ShopLayout } from '../../components/layouts';
 import CartList from '../../components/cart/CartList';
 import { OrdenSummary } from '../../components/cart';
+import { CartContext } from '../../context';
+import { useContext, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 const Index = () => {
+  const { isLoaded, cart } = useContext(CartContext);
+  const router = useRouter();
+  useEffect(() => {
+    if (isLoaded && cart.length === 0) router.replace('/cart/empty');
+  }, [cart, isLoaded, router]);
+
+  if (!isLoaded) {
+    return <></>;
+  }
   return (
     <ShopLayout title="Carrito - 3" pageDescription="Carrito de compras de la tienda">
       <Typography variant="h1" component="h1">
@@ -21,7 +33,7 @@ const Index = () => {
               <Divider sx={{ my: 1 }} />
               <OrdenSummary />
               <Box sx={{ mt: 3 }}>
-                <Button color="secondary" className="circular-btn" fullWidth>
+                <Button color="secondary" className="circular-btn" fullWidth href="/checkout/address">
                   Checkout
                 </Button>
               </Box>

@@ -14,7 +14,7 @@ const AuthLayout: FC<Props> = ({ title, children }) => {
         <title>{title}</title>
       </Head>
       <main>
-        <Box display="flex" justifyContent="center" alignItems="center" height="calc(100hv - 200px)">
+        <Box display="flex" justifyContent="center" alignItems="center" height="calc(100vh - 200px)">
           {children}
         </Box>
       </main>
