@@ -6,6 +6,7 @@ import { IUser } from '../../interfaces';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { CookiesTypes } from '../../constants/cookies';
+import { signOut, useSession } from 'next-auth/react';
 
 export interface AuthState {
   isLoggedIn: boolean;
@@ -19,23 +20,31 @@ const AuthInitialState: AuthState = {
 
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, AuthInitialState);
+  const { data, status } = useSession();
   const router = useRouter();
+
   useEffect(() => {
-    checkToken();
-  }, []);
-
-  const checkToken = async () => {
-    if (!Cookies.get('token')) return;
-
-    try {
-      const { data } = await tesloApi('/user/validate-token');
-      const { token, user } = data;
-      Cookies.set('token', token);
-      dispatch({ type: 'Auth - Login', payload: user });
-    } catch (error) {
-      Cookies.remove('token');
+    if (status === 'authenticated') {
+      dispatch({ type: 'Auth - Login', payload: data.user as IUser });
     }
-  };
+  }, [status, data]);
+
+  // useEffect(() => {
+  //   checkToken();
+  // }, []);
+
+  // const checkToken = async () => {
+  //   if (!Cookies.get('token')) return;
+
+  //   try {
+  //     const { data } = await tesloApi('/user/validate-token');
+  //     const { token, user } = data;
+  //     Cookies.set('token', token);
+  //     dispatch({ type: 'Auth - Login', payload: user });
+  //   } catch (error) {
+  //     Cookies.remove('token');
+  //   }
+  // };
 
   const loginUser = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -75,7 +84,6 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   };
 
   const logOut = () => {
-    Cookies.remove('token');
     Cookies.remove(CookiesTypes.CART);
     Cookies.remove('firstName');
     Cookies.remove('lastName');
@@ -85,7 +93,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     Cookies.remove('city');
     Cookies.remove('country');
     Cookies.remove('phone');
-    router.reload();
+    signOut();
   };
 
   return (

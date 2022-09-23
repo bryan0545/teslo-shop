@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import { CartContext } from '../../context';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
 type FormData = {
   firstName: string;
@@ -38,9 +38,23 @@ const AddressPage = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<FormData>({
-    defaultValues: getAddressFromCookies(),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      address: '',
+      address2: '',
+      zip: '',
+      city: '',
+      country: '',
+      phone: '',
+    },
   });
+
+  useEffect(() => {
+    reset(getAddressFromCookies());
+  }, [reset]);
 
   const onSubmitAddress = (data: FormData) => {
     updateAddress(data);
@@ -110,20 +124,21 @@ const AddressPage = () => {
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <TextField
-                select
+                // select
                 variant="filled"
                 label="País"
-                defaultValue={Cookies.get('country') || countries[0].code}
+                // defaultValue={Cookies.get('country') || countries[0].code}
+                fullWidth
                 {...register('country', { required: 'Este campo es requerido' })}
                 error={!!errors.country}
                 helperText={errors.country?.message}
-              >
-                {countries.map((country) => (
+              />
+              {/* {countries.map((country) => (
                   <MenuItem key={country.code} value={country.code}>
                     {country.name}
                   </MenuItem>
-                ))}
-              </TextField>
+                ))} */}
+              {/* </TextField> */}
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>

@@ -19,7 +19,6 @@ type CartActionType =
     };
 
 export const cartReducer = (state: CartState, actions: CartActionType): CartState => {
-  console.log('actions.type', actions.type);
   switch (actions.type) {
     case 'Cart - LoadCart from cookies | storage':
       return {
