@@ -6,12 +6,12 @@ import CartList from '../../components/cart/CartList';
 import { OrdenSummary } from '../../components/cart';
 import { CartContext } from '../../context';
 import { useContext, useEffect } from 'react';
-import { countries } from '../../utilities';
+// import { countries } from '../../utilities';
 import Cookie from 'js-cookie';
 import { useRouter } from 'next/router';
 
 const Summary = () => {
-  const { shippingAddress, numberOfItems } = useContext(CartContext);
+  const { shippingAddress, numberOfItems, createOrder } = useContext(CartContext);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,6 +24,10 @@ const Summary = () => {
     return <></>;
   }
   const { firstName, lastName, address, address2 = '', zip, city, country, phone } = shippingAddress;
+
+  const onCreateOrder = () => {
+    createOrder();
+  };
 
   return (
     <ShopLayout title="Resumen de compra" pageDescription="Resumen de la orden">
@@ -70,7 +74,7 @@ const Summary = () => {
               </NextLink>
               <OrdenSummary />
               <Box sx={{ mt: 3 }}>
-                <Button color="secondary" className="circular-btn" fullWidth>
+                <Button color="secondary" className="circular-btn" fullWidth onClick={onCreateOrder}>
                   Cinfirmar orden
                 </Button>
               </Box>

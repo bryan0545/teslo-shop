@@ -2,6 +2,9 @@ import { FC, PropsWithChildren, useEffect, useReducer } from 'react';
 import { ICartProduct } from '../../interfaces/cart';
 import { CartContext, cartReducer } from './';
 import Cookies from 'js-cookie';
+import { ShippingAddress } from '../../interfaces';
+import { tesloApi } from '../../api';
+import { IOrder } from '../../interfaces/order';
 
 export interface CartState {
   isLoaded: boolean;
@@ -11,17 +14,6 @@ export interface CartState {
   tax: number;
   total: number;
   shippingAddress?: ShippingAddress;
-}
-
-export interface ShippingAddress {
-  firstName: string;
-  lastName: string;
-  address: string;
-  address2?: string;
-  zip: string;
-  city: string;
-  country: string;
-  phone: string;
 }
 
 const CartInitialState: CartState = {
@@ -114,14 +106,43 @@ export const CartProvider: FC<PropsWithChildren> = ({ children }) => {
     dispatch({ type: 'Cart - Update Address', payLoad: address });
   };
 
+  const createOrder = async () => {
+    if (!state.shippingAddress) {
+      throw new Error('No hay direccion de entrega');
+    }
+
+    const body: IOrder = {
+      orderItems: state.cart.map((p) => ({
+        ...p,
+        size: p.size!,
+      })),
+      shippingAddress: state.shippingAddress,
+      numberOfItems: state.numberOfItems,
+      subtotal: state.subtotal,
+      tax: state.tax,
+      total: state.total,
+      isPaid: false,
+    };
+
+    try {
+      const { data } = await tesloApi.post('/orders', body);
+      console.log('data', data);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
         ...state,
+
         addProductCart,
         updateCartQuantity,
         removeCartProduct,
         updateAddress,
+
+        createOrder,
       }}
     >
       {children}

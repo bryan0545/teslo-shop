@@ -1,18 +1,24 @@
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
 import Credentials from 'next-auth/providers/credentials';
+
 import { dbUsers } from '../../../database';
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
   providers: [
+    // ...add more providers here
+
     Credentials({
       name: 'Custom Login',
       credentials: {
-        email: { label: 'Correo', type: 'email', placeholder: 'Correo"google.com' },
-        password: { label: 'Contraseña', type: 'password', placeholder: 'Contraseña' },
+        email: { label: 'Correo:', type: 'email', placeholder: 'correo@google.com' },
+        password: { label: 'Contraseña:', type: 'password', placeholder: 'Contraseña' },
       },
       async authorize(credentials) {
+        console.log({ credentials });
+        // return { name: 'Juan', correo: 'juan@google.com', role: 'admin' };
+
         return await dbUsers.checkUserEmailPassword(credentials!.email, credentials!.password);
       },
     }),
@@ -22,25 +28,36 @@ export default NextAuth({
       clientSecret: process.env.GITHUB_SECRET || '',
     }),
   ],
+
+  // Custom Pages
   pages: {
     signIn: '/auth/login',
     newUser: '/auth/register',
   },
 
+  // Callbacks
+  jwt: {
+    // secret: process.env.JWT_SECRET_SEED, // deprecated
+  },
+
   session: {
-    maxAge: 2592000,
+    maxAge: 2592000, /// 30d
     strategy: 'jwt',
-    updateAge: 86400,
+    updateAge: 86400, // cada día
   },
 
   callbacks: {
     async jwt({ token, account, user }) {
+      // console.log({ token, account, user });
+
       if (account) {
         token.accessToken = account.access_token;
+
         switch (account.type) {
           case 'oauth':
             token.user = await dbUsers.oAuthToUser(user?.email || '', user?.name || '');
             break;
+
           case 'credentials':
             token.user = user;
             break;
@@ -51,9 +68,14 @@ export default NextAuth({
     },
 
     async session({ session, token, user }) {
-      session.accesToken = token.accessToken;
+      // console.log({ session, token, user });
+
+      session.accessToken = token.accessToken;
       session.user = token.user as any;
+
       return session;
     },
   },
-});
+};
+
+export default NextAuth(authOptions);

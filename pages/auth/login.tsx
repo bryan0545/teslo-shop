@@ -117,7 +117,7 @@ const LoginPage = () => {
 export const getServerSideProps: GetServerSideProps = async ({ req, query }) => {
   const session = await getSession({ req });
   const { p = '/' } = query;
-
+  console.log('session log', session);
   if (session) {
     return {
       redirect: {
